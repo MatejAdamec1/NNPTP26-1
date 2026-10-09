@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NNPTPZ1
 {
@@ -21,6 +18,7 @@ namespace NNPTPZ1
         private string outputPath;
 
         private const int ExpectedArgumentCount = 7;
+        private const int MaxIterations = 30;
 
         private Bitmap bitmapImage;
 
@@ -31,7 +29,7 @@ namespace NNPTPZ1
 
         public NewtonFractal(string[] args)
         {
-            if (ParseArgs(args))
+            if (TryParseArguments(args))
             {
                 bitmapImage = new Bitmap(width, height);
             }
@@ -41,7 +39,7 @@ namespace NNPTPZ1
             }
         }
 
-        private bool ParseArgs(string[] args)
+        private bool TryParseArguments(string[] args)
         {
             if (args.Length < ExpectedArgumentCount)
             {
@@ -66,19 +64,14 @@ namespace NNPTPZ1
             return true;
         }
 
-        private void PrintPolynomialAndDerivedPolynomial(Polynomial polynomial, Polynomial derivedPolynomial)
-        {
-            Console.WriteLine(polynomial);
-            Console.WriteLine(derivedPolynomial);
-        }
-
         public void CalculateNewtonFractal(int[] coefficients)
         {
             List<ComplexNumber> roots = new List<ComplexNumber>();
             Polynomial polynomial = CreatePolynomialFromCoefficients(coefficients);
             Polynomial derivedPolynomial = polynomial.Derive();
 
-            PrintPolynomialAndDerivedPolynomial(polynomial, derivedPolynomial);
+            Console.WriteLine(polynomial);
+            Console.WriteLine(derivedPolynomial);
 
             double xStep = (xMax - xMin) / width;
             double yStep = (yMax - yMin) / height;
@@ -97,7 +90,7 @@ namespace NNPTPZ1
                     if (currentEstimate.ImaginaryPart == 0)
                         currentEstimate.ImaginaryPart = 0.0001;
 
-                    int iteration = SolveEquationUsingNewtonsIteration(polynomial, derivedPolynomial, ref currentEstimate);
+                    int iteration = SolveUsingNewtonsMethod(polynomial, derivedPolynomial, ref currentEstimate);
                     int id = FindRoot(roots, currentEstimate);
                     ColorizePixel(j, i, iteration, id);
                 }
@@ -105,17 +98,17 @@ namespace NNPTPZ1
             return;
         }
 
-        private static int SolveEquationUsingNewtonsIteration(Polynomial polynomial, Polynomial derivedPolynomial, ref ComplexNumber currentEstimate)
+        private static int SolveUsingNewtonsMethod(Polynomial polynomial, Polynomial derivedPolynomial, ref ComplexNumber currentEstimate)
         {
             int iteration = 0;
-            for (int q = 0; q < 30; q++)
+            for (int iterationIndex = 0; iterationIndex < MaxIterations; iterationIndex++)
             {
                 var diff = polynomial.Eval(currentEstimate).Divide(derivedPolynomial.Eval(currentEstimate));
                 currentEstimate = currentEstimate.Subtract(diff);
 
                 if (Math.Pow(diff.RealPart, 2) + Math.Pow(diff.ImaginaryPart, 2) >= 0.5)
                 {
-                    q--;
+                    iterationIndex--;
                 }
                 iteration++;
             }
