@@ -8,7 +8,8 @@ namespace NNPTPZ1
         public class Polynomial
         {
             /// <summary>
-            /// Coe
+            /// Coefficients of polynomial,
+            /// index is the power of x
             /// </summary>
             public List<ComplexNumber> Coefficients { get; set; }
 
@@ -84,8 +85,9 @@ namespace NNPTPZ1
                             result += "x";
                         }
                     }
-                    if (coefficientIndex+1<Coefficients.Count)
-                    result += " + ";
+                    if (coefficientIndex + 1 < Coefficients.Count) { 
+                        result += " + ";
+                    }
                 }
                 return result;
             }
